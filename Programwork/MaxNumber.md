@@ -1,4 +1,3 @@
-````markdown id="r4m8kd"
 # README - MaxNumber
 
 ## ชื่อโปรแกรม
@@ -71,4 +70,3 @@ Maximum number = 50
 - การหาค่าสูงสุด (Maximum) จากข้อมูลหลายค่า
 - การแสดงผลด้วย `System.out.println()`
 - การปิด `Scanner` ด้วย `sc.close()`
-````

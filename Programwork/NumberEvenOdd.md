@@ -1,4 +1,3 @@
-````markdown id="n7q5xp"
 # README - NumberEvenOdd
 
 ## ชื่อโปรแกรม
@@ -65,4 +64,3 @@ Odd count = 5
 - การนับจำนวนข้อมูลด้วยตัวแปร (`evenCount` และ `oddCount`)
 - การแสดงผลด้วย `System.out.println()`
 - การปิด `Scanner` ด้วย `sc.close()`
-````

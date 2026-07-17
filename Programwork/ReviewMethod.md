@@ -1,4 +1,3 @@
-````markdown id="v6l2mc"
 # README - ReviewMethod
 
 ## ชื่อโปรแกรม
@@ -65,4 +64,3 @@ Maximum number = 90
 - การรับข้อมูลจากผู้ใช้ด้วย `Scanner`
 - การแสดงผลด้วย `System.out.println()`
 - การปิด `Scanner` ด้วย `sc.close()`
-````

@@ -1,4 +1,3 @@
-````markdown id="x4n8qk"
 # README - ScoreArray
 
 ## ชื่อโปรแกรม
@@ -68,4 +67,3 @@ Average score = 80.0
 - การใช้ `score.length` เพื่อหาจำนวนสมาชิกในอาร์เรย์
 - การแสดงผลด้วย `System.out.println()`
 - การปิด `Scanner` ด้วย `sc.close()`
-````
