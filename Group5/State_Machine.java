@@ -1,154 +1,17 @@
 package Group5;
 
-/*
- * Algorithm B:
- * Event Stack + State Machine
- */
-public class State_Machine
-        implements WorkflowAlgorithm {
+public class State_Machine extends WorkflowAlgorithm {
 
-    private final WorkflowData data =
-            new WorkflowData();
+    @Override
+    public String getName() {
 
-    private long pushCount;
-    private long popCount;
-    private long comparisonCount;
-    private long loopCount;
-
-    /*
-     * Transition Table
-     */
-    private State transition(
-            State state,
-            Action action) {
-
-        comparisonCount++;
-
-        if (state == State.NEW &&
-                action == Action.CALL_RECEIVED) {
-
-            return State.RECEIVED;
-        }
-
-        comparisonCount++;
-
-        if (state == State.RECEIVED &&
-                action == Action.TEAM_ASSIGNED) {
-
-            return State.ASSIGNED;
-        }
-
-        comparisonCount++;
-
-        if (state == State.ASSIGNED &&
-                action == Action.VEHICLE_DISPATCHED) {
-
-            return State.DISPATCHED;
-        }
-
-        comparisonCount++;
-
-        if (state == State.DISPATCHED &&
-                action == Action.ARRIVED_AT_SCENE) {
-
-            return State.ON_SCENE;
-        }
-
-        comparisonCount++;
-
-        if (state == State.ON_SCENE &&
-                action == Action.CASE_CLOSED) {
-
-            return State.CLOSED;
-        }
-
-        return null;
+        return "Algorithm B - Event Stack + State Machine";
     }
 
-    /*
-     * ใช้เฉพาะตอน Undo
-     *
-     * หา State ก่อนหน้า
-     */
-    private State previousState(
-            State state,
-            Action action) {
+    // =====================================================
+    // ADD ACTION
+    // =====================================================
 
-        comparisonCount++;
-
-        if (state == State.RECEIVED &&
-                action == Action.CALL_RECEIVED) {
-
-            return State.NEW;
-        }
-
-        comparisonCount++;
-
-        if (state == State.ASSIGNED &&
-                action == Action.TEAM_ASSIGNED) {
-
-            return State.RECEIVED;
-        }
-
-        comparisonCount++;
-
-        if (state == State.DISPATCHED &&
-                action == Action.VEHICLE_DISPATCHED) {
-
-            return State.ASSIGNED;
-        }
-
-        comparisonCount++;
-
-        if (state == State.ON_SCENE &&
-                action == Action.ARRIVED_AT_SCENE) {
-
-            return State.DISPATCHED;
-        }
-
-        comparisonCount++;
-
-        if (state == State.CLOSED &&
-                action == Action.CASE_CLOSED) {
-
-            return State.ON_SCENE;
-        }
-
-        return null;
-    }
-
-    /*
-     * ตรวจสอบ Invariant
-     *
-     * ใช้สำหรับตรวจสอบความถูกต้องเท่านั้น
-     * ไม่ได้ใช้เป็นวิธีหลักในการ Add Action
-     */
-    private boolean validateInvariant() {
-
-        State state = State.NEW;
-
-        for (Action action :
-                data.eventBottomToTop()) {
-
-            loopCount++;
-
-            state =
-                    transition(
-                            state,
-                            action);
-
-            if (state == null) {
-                return false;
-            }
-        }
-
-        return state ==
-                data.getCurrentState();
-    }
-
-    /*
-     * เพิ่ม Action
-     */
     @Override
     public boolean addAction(Action action) {
 
@@ -157,21 +20,19 @@ public class State_Machine
         }
 
         /*
-         * Algorithm B:
-         *
-         * ใช้ currentState
-         * ตรวจ State Machine โดยตรง
+         * ใช้ currentState โดยตรง
+         * ไม่ต้อง Replay Event Stack
          */
+
         State nextState =
                 transition(
                         data.getCurrentState(),
                         action);
 
         /*
-         * กฎข้อ 5
-         *
-         * ห้าม Transition ผิดลำดับ
+         * Transition ผิดลำดับ
          */
+
         if (nextState == null) {
             return false;
         }
@@ -179,199 +40,125 @@ public class State_Machine
         /*
          * เพิ่ม Action
          */
-        data.getEventStack().push(action);
+
+        data.pushEvent(action);
 
         pushCount++;
 
         /*
-         * Update currentState
-         */
-        data.setCurrentState(nextState);
-
-        /*
-         * กฎข้อ 3
-         *
-         * เพิ่ม Action ใหม่หลัง Redo
+         * กฎ:
+         * เพิ่ม Action ใหม่หลัง Undo/Redo
          * ต้องล้าง Redo Stack
          */
-        data.getRedoStack().clear();
+
+        data.clearRedo();
 
         /*
-         * กฎข้อ 4
+         * Update State
          */
-        return validateInvariant();
+
+        data.setCurrentState(
+                nextState);
+
+        return true;
     }
 
-    /*
-     * Undo
-     */
+    // =====================================================
+    // UNDO
+    // =====================================================
+
     @Override
     public boolean undo() {
 
-        /*
-         * Event Stack ว่าง
-         */
         if (data.getEventStack().isEmpty()) {
             return false;
         }
 
-        /*
-         * เอา Action ล่าสุดออก
-         */
-        Action removed =
-                data.getEventStack().pop();
+        Action action =
+                data.popEvent();
 
         popCount++;
 
         /*
-         * หา State ก่อนหน้า
+         * หาสถานะก่อนหน้าโดยตรง
          */
+
         State previous =
                 previousState(
                         data.getCurrentState(),
-                        removed);
+                        action);
 
-        /*
-         * ถ้าหา State ไม่ได้
-         * ให้คืน Action กลับ
-         */
         if (previous == null) {
 
-            data.getEventStack()
-                    .push(removed);
+            /*
+             * คืนข้อมูลถ้าเกิดข้อผิดพลาด
+             */
+
+            data.pushEvent(action);
 
             pushCount++;
 
             return false;
         }
 
-        /*
-         * ย้าย Action ไป Redo
-         */
-        data.getRedoStack().push(removed);
+        data.pushRedo(action);
 
         pushCount++;
 
-        /*
-         * Update State
-         */
+        movedDataCount++;
+
         data.setCurrentState(previous);
 
-        /*
-         * กฎข้อ 4
-         */
-        return validateInvariant();
+        return true;
     }
 
-    /*
-     * Redo
-     */
+    // =====================================================
+    // REDO
+    // =====================================================
+
     @Override
     public boolean redo() {
 
-        /*
-         * ไม่มี Redo
-         */
         if (data.getRedoStack().isEmpty()) {
             return false;
         }
 
-        /*
-         * กฎข้อ 2
-         *
-         * Redo 1 ครั้ง
-         * ต้องคืน Action ล่าสุด
-         * กลับ Event Stack
-         */
         Action action =
-                data.getRedoStack().peek();
+                data.popRedo();
+
+        popCount++;
 
         /*
-         * ตรวจ Transition
-         * จาก currentState โดยตรง
+         * ตรวจ Action จาก currentState
          */
+
         State nextState =
                 transition(
                         data.getCurrentState(),
                         action);
 
-        /*
-         * Redo ไม่ได้
-         */
         if (nextState == null) {
+
+            /*
+             * คืน Action ถ้า Transition ผิด
+             */
+
+            data.pushRedo(action);
+
+            pushCount++;
+
             return false;
         }
 
-        /*
-         * ย้าย Redo -> Event
-         */
-        data.getRedoStack().pop();
-
-        popCount++;
-
-        data.getEventStack().push(action);
+        data.pushEvent(action);
 
         pushCount++;
 
-        /*
-         * Update State
-         */
-        data.setCurrentState(nextState);
+        movedDataCount++;
 
-        /*
-         * กฎข้อ 4
-         */
-        return validateInvariant();
-    }
+        data.setCurrentState(
+                nextState);
 
-    @Override
-    public boolean isInvariantValid() {
-        return validateInvariant();
-    }
-
-    @Override
-    public State getCurrentState() {
-        return data.getCurrentState();
-    }
-
-    @Override
-    public WorkflowData getData() {
-        return data;
-    }
-
-    @Override
-    public long getPushCount() {
-        return pushCount;
-    }
-
-    @Override
-    public long getPopCount() {
-        return popCount;
-    }
-
-    @Override
-    public long getComparisonCount() {
-        return comparisonCount;
-    }
-
-    @Override
-    public long getLoopCount() {
-        return loopCount;
-    }
-
-    @Override
-    public String getName() {
-        return "Algorithm B: Event Stack + State Machine";
-    }
-
-    @Override
-    public void reset() {
-
-        data.reset();
-
-        pushCount = 0;
-        popCount = 0;
-        comparisonCount = 0;
-        loopCount = 0;
+        return true;
     }
 }

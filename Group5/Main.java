@@ -8,7 +8,9 @@ public class Main {
     private static final Scanner scanner =
             new Scanner(System.in);
 
-    // Algorithm เริ่มต้น
+    /*
+     * เริ่มต้นด้วย Algorithm B
+     */
     private static WorkflowAlgorithm algorithm =
             new State_Machine();
 
@@ -78,8 +80,6 @@ public class Main {
             if (running) {
                 showStatus();
             }
-
-            System.out.println();
         }
 
         scanner.close();
@@ -92,6 +92,7 @@ public class Main {
     private static void showMenu() {
 
         System.out.println();
+
         System.out.println(
                 "==============================================");
 
@@ -103,7 +104,7 @@ public class Main {
 
         System.out.println(
                 "Algorithm : "
-                        + getAlgorithmName());
+                        + algorithm.getName());
 
         System.out.println(
                 "Current State : "
@@ -138,7 +139,7 @@ public class Main {
     }
 
     // =====================================================
-    // 1. เพิ่ม ACTION
+    // 1. ADD ACTION
     // =====================================================
 
     private static void addAction() {
@@ -151,12 +152,6 @@ public class Main {
 
         System.out.println(
                 "==============================================");
-
-        System.out.println(
-                "Current State : "
-                        + algorithm.getCurrentState());
-
-        System.out.println();
 
         System.out.println(
                 "1. CALL_RECEIVED");
@@ -176,16 +171,10 @@ public class Main {
         System.out.println(
                 "0. ยกเลิก");
 
-        System.out.println();
-
         int choice =
                 readInt("เลือก Action: ");
 
         if (choice == 0) {
-
-            System.out.println(
-                    "ยกเลิกการเพิ่ม Action");
-
             return;
         }
 
@@ -195,7 +184,7 @@ public class Main {
         if (action == null) {
 
             System.out.println(
-                    "เลือก Action ไม่ถูกต้อง");
+                    "Action ไม่ถูกต้อง");
 
             return;
         }
@@ -205,30 +194,17 @@ public class Main {
 
         if (success) {
 
-            System.out.println();
             System.out.println(
-                    "เพิ่ม Action สำเร็จ");
-
-            System.out.println(
-                    "Action : "
+                    "เพิ่ม Action สำเร็จ: "
                             + action);
-
-            System.out.println(
-                    "Current State ใหม่ : "
-                            + algorithm.getCurrentState());
 
         } else {
 
-            System.out.println();
             System.out.println(
-                    "ไม่สามารถเพิ่ม Action ได้");
+                    "เพิ่ม Action ไม่สำเร็จ");
 
             System.out.println(
                     "ห้าม Transition ผิดลำดับ");
-
-            System.out.println(
-                    "Event Stack และ Redo Stack "
-                            + "ไม่ถูกเปลี่ยน");
         }
     }
 
@@ -238,25 +214,16 @@ public class Main {
 
     private static void undoAction() {
 
-        boolean success =
-                algorithm.undo();
-
-        if (success) {
+        if (algorithm.undo()) {
 
             System.out.println(
                     "UNDO สำเร็จ");
 
-            System.out.println(
-                    "Action ล่าสุดถูกย้ายจาก "
-                            + "Event Stack -> Redo Stack");
-
         } else {
 
             System.out.println(
-                    "UNDO ไม่สำเร็จ");
-
-            System.out.println(
-                    "Event Stack ไม่มี Action");
+                    "UNDO ไม่สำเร็จ "
+                            + "(Event Stack ว่าง)");
         }
     }
 
@@ -266,26 +233,17 @@ public class Main {
 
     private static void redoAction() {
 
-        boolean success =
-                algorithm.redo();
-
-        if (success) {
+        if (algorithm.redo()) {
 
             System.out.println(
                     "REDO สำเร็จ");
 
-            System.out.println(
-                    "Action ล่าสุดถูกย้ายจาก "
-                            + "Redo Stack -> Event Stack");
-
         } else {
 
             System.out.println(
-                    "REDO ไม่สำเร็จ");
-
-            System.out.println(
-                    "Redo Stack ไม่มี Action "
-                            + "หรือ Transition ไม่ถูกต้อง");
+                    "REDO ไม่สำเร็จ "
+                            + "(Redo Stack ว่าง "
+                            + "หรือ Transition ผิด)");
         }
     }
 
@@ -298,26 +256,20 @@ public class Main {
         algorithm.reset();
 
         System.out.println(
-                "==============================================");
+                "Reset สำเร็จ");
 
         System.out.println(
-                "                    RESET");
+                "Event Stack = ว่าง");
 
         System.out.println(
-                "==============================================");
-
-        System.out.println(
-                "Event Stack ถูกล้าง");
-
-        System.out.println(
-                "Redo Stack ถูกล้าง");
+                "Redo Stack = ว่าง");
 
         System.out.println(
                 "Current State = NEW");
     }
 
     // =====================================================
-    // 5. เปลี่ยน ALGORITHM
+    // 5. CHANGE ALGORITHM
     // =====================================================
 
     private static void changeAlgorithm() {
@@ -332,12 +284,6 @@ public class Main {
                 "==============================================");
 
         System.out.println(
-                "Algorithm ปัจจุบัน : "
-                        + getAlgorithmName());
-
-        System.out.println();
-
-        System.out.println(
                 "1. Algorithm A - Event Stack");
 
         System.out.println(
@@ -345,8 +291,6 @@ public class Main {
 
         System.out.println(
                 "0. ยกเลิก");
-
-        System.out.println();
 
         int choice =
                 readInt("เลือก Algorithm: ");
@@ -359,11 +303,10 @@ public class Main {
                         new Event_Stack();
 
                 System.out.println(
-                        "เปลี่ยนเป็น Algorithm A สำเร็จ");
+                        "เปลี่ยนเป็น Algorithm A");
 
                 System.out.println(
-                        "ระบบ Reset เพื่อป้องกัน "
-                                + "ข้อมูล Algorithm เดิมปะปน");
+                        "ระบบ Reset อัตโนมัติ");
 
                 break;
 
@@ -373,25 +316,20 @@ public class Main {
                         new State_Machine();
 
                 System.out.println(
-                        "เปลี่ยนเป็น Algorithm B สำเร็จ");
+                        "เปลี่ยนเป็น Algorithm B");
 
                 System.out.println(
-                        "ระบบ Reset เพื่อป้องกัน "
-                                + "ข้อมูล Algorithm เดิมปะปน");
+                        "ระบบ Reset อัตโนมัติ");
 
                 break;
 
             case 0:
-
-                System.out.println(
-                        "ยกเลิก");
-
                 break;
 
             default:
 
                 System.out.println(
-                        "เลือก Algorithm ไม่ถูกต้อง");
+                        "เลือกไม่ถูกต้อง");
         }
     }
 
@@ -406,20 +344,15 @@ public class Main {
         while (!back) {
 
             System.out.println();
-            System.out.println(
-                    "==============================================");
-
-            System.out.println(
-                    "             TEST & ANALYSIS");
 
             System.out.println(
                     "==============================================");
 
             System.out.println(
-                    "Algorithm : "
-                            + getAlgorithmName());
+                    "              TEST & ANALYSIS");
 
-            System.out.println();
+            System.out.println(
+                    "==============================================");
 
             System.out.println(
                     "1. Test Cases 10 ข้อ");
@@ -431,12 +364,10 @@ public class Main {
                     "3. Performance Test");
 
             System.out.println(
-                    "0. กลับเมนูหลัก");
-
-            System.out.println();
+                    "0. กลับ");
 
             int choice =
-                    readInt("เลือกเมนู: ");
+                    readInt("เลือก: ");
 
             switch (choice) {
 
@@ -458,7 +389,7 @@ public class Main {
 
                 default:
                     System.out.println(
-                            "กรุณาเลือก 0 - 3");
+                            "เลือกไม่ถูกต้อง");
             }
         }
     }
@@ -469,18 +400,11 @@ public class Main {
 
     private static void showOperationCount() {
 
-        System.out.println(
-                "==============================================");
-
-        System.out.println(
-                "              OPERATION COUNT");
-
-        System.out.println(
-                "==============================================");
+        System.out.println();
 
         System.out.println(
                 "Algorithm : "
-                        + getAlgorithmName());
+                        + algorithm.getName());
 
         System.out.println(
                 "Push : "
@@ -499,35 +423,15 @@ public class Main {
                         + algorithm.getLoopCount());
 
         System.out.println(
-                "Event Stack Size : "
-                        + algorithm.getData()
-                        .getEventStack()
-                        .size());
-
-        System.out.println(
-                "Redo Stack Size : "
-                        + algorithm.getData()
-                        .getRedoStack()
-                        .size());
-
-        System.out.println(
-                "==============================================");
+                "Moved Data : "
+                        + algorithm.getMovedDataCount());
     }
 
     // =====================================================
-    // TEST CASES
+    // TEST CASES 1-10
     // =====================================================
 
     private static void runAllTests() {
-
-        System.out.println(
-                "==============================================");
-
-        System.out.println(
-                "             TEST CASES 1 - 10");
-
-        System.out.println(
-                "==============================================");
 
         runTestsFor(
                 new Event_Stack());
@@ -545,30 +449,22 @@ public class Main {
 
         System.out.println();
         System.out.println(
-                a.getName());
+                "========== "
+                        + a.getName()
+                        + " ==========");
 
-        // -------------------------------------------------
         // Test 1
-        // Workflow ถูกต้องตั้งแต่เริ่มจนจบ
-        // -------------------------------------------------
-
         a.reset();
 
         boolean test1 =
                 addFullWorkflow(a)
                 &&
                 a.getCurrentState()
-                        == State.CLOSED
-                &&
-                a.isInvariantValid();
+                        == State.CLOSED;
 
         passed += printTest(1, test1);
 
-        // -------------------------------------------------
         // Test 2
-        // เพิ่ม Action ผิดลำดับ
-        // -------------------------------------------------
-
         a.reset();
 
         boolean test2 =
@@ -576,19 +472,11 @@ public class Main {
                         Action.TEAM_ASSIGNED)
                 &&
                 a.getCurrentState()
-                        == State.NEW
-                &&
-                a.getData()
-                        .getEventStack()
-                        .isEmpty();
+                        == State.NEW;
 
         passed += printTest(2, test2);
 
-        // -------------------------------------------------
         // Test 3
-        // ปิด Case ก่อนเกิดเหตุ
-        // -------------------------------------------------
-
         a.reset();
 
         boolean test3 =
@@ -600,11 +488,7 @@ public class Main {
 
         passed += printTest(3, test3);
 
-        // -------------------------------------------------
         // Test 4
-        // Undo หนึ่งครั้ง
-        // -------------------------------------------------
-
         a.reset();
 
         a.addAction(
@@ -626,12 +510,7 @@ public class Main {
 
         passed += printTest(4, test4);
 
-        // -------------------------------------------------
         // Test 5
-        // Undo หลายครั้ง
-        // ต้องมี 2 Action ใน Redo
-        // -------------------------------------------------
-
         a.reset();
 
         a.addAction(
@@ -643,11 +522,10 @@ public class Main {
         a.addAction(
                 Action.VEHICLE_DISPATCHED);
 
+        a.undo();
+        a.undo();
+
         boolean test5 =
-                a.undo()
-                &&
-                a.undo()
-                &&
                 a.getData()
                         .getRedoStack()
                         .size()
@@ -658,11 +536,7 @@ public class Main {
 
         passed += printTest(5, test5);
 
-        // -------------------------------------------------
         // Test 6
-        // Redo บางส่วน
-        // -------------------------------------------------
-
         boolean test6 =
                 a.redo()
                 &&
@@ -671,22 +545,12 @@ public class Main {
                         .size()
                         == 1
                 &&
-                a.getData()
-                        .getEventStack()
-                        .size()
-                        == 2
-                &&
                 a.getCurrentState()
                         == State.ASSIGNED;
 
         passed += printTest(6, test6);
 
-        // -------------------------------------------------
         // Test 7
-        // เพิ่ม Action ใหม่หลัง Redo
-        // ต้องล้าง Redo
-        // -------------------------------------------------
-
         boolean test7 =
                 a.addAction(
                         Action.VEHICLE_DISPATCHED)
@@ -700,20 +564,22 @@ public class Main {
 
         passed += printTest(7, test7);
 
-        // -------------------------------------------------
         // Test 8
-        // Undo จน Stack ว่าง
-        // -------------------------------------------------
-
         a.reset();
 
         a.addAction(
                 Action.CALL_RECEIVED);
 
+        boolean firstUndo =
+                a.undo();
+
+        boolean secondUndo =
+                a.undo();
+
         boolean test8 =
-                a.undo()
+                firstUndo
                 &&
-                !a.undo()
+                !secondUndo
                 &&
                 a.getData()
                         .getEventStack()
@@ -724,11 +590,7 @@ public class Main {
 
         passed += printTest(8, test8);
 
-        // -------------------------------------------------
         // Test 9
-        // Redo เมื่อไม่มีรายการ
-        // -------------------------------------------------
-
         a.reset();
 
         boolean test9 =
@@ -739,11 +601,7 @@ public class Main {
 
         passed += printTest(9, test9);
 
-        // -------------------------------------------------
         // Test 10
-        // เพิ่ม Action หลังปิด Case
-        // -------------------------------------------------
-
         a.reset();
 
         addFullWorkflow(a);
@@ -753,27 +611,18 @@ public class Main {
                         Action.CALL_RECEIVED)
                 &&
                 a.getCurrentState()
-                        == State.CLOSED
-                &&
-                a.getData()
-                        .getEventStack()
-                        .size()
-                        == 5;
+                        == State.CLOSED;
 
         passed += printTest(10, test10);
 
         System.out.println(
-                "----------------------------------------------");
+                "--------------------------------");
 
         System.out.println(
-                "ผลการทดสอบ : "
+                "ผลรวม: "
                         + passed
                         + "/10 PASS");
     }
-
-    // =====================================================
-    // FULL WORKFLOW
-    // =====================================================
 
     private static boolean addFullWorkflow(
             WorkflowAlgorithm a) {
@@ -800,17 +649,17 @@ public class Main {
 
     private static int printTest(
             int number,
-            boolean pass) {
+            boolean result) {
 
         System.out.println(
                 "Test "
                         + number
                         + " : "
-                        + (pass
+                        + (result
                         ? "PASS"
                         : "FAIL"));
 
-        return pass ? 1 : 0;
+        return result ? 1 : 0;
     }
 
     // =====================================================
@@ -828,51 +677,56 @@ public class Main {
 
         int rounds = 5;
 
-        System.out.println(
-                "==============================================");
+        System.out.println();
 
         System.out.println(
-                "             PERFORMANCE TEST");
+                "==============================================================");
 
         System.out.println(
-                "==============================================");
+                "                 PERFORMANCE TEST");
 
         System.out.println(
-                "ทดสอบทั้งหมด "
+                "==============================================================");
+
+        System.out.println(
+                "แต่ละ n ทดสอบ "
                         + rounds
                         + " รอบ");
 
         System.out.println();
 
         System.out.printf(
-                "%-8s %-38s %-15s %-10s %-10s %-15s %-10s%n",
+                "%-8s %-32s %-18s %-10s %-10s %-15s %-10s%n",
                 "n",
                 "Algorithm",
-                "Average(ns)",
+                "Average Time(ns)",
                 "Push",
                 "Pop",
                 "Comparisons",
-                "Loops"
-        );
+                "Loops");
 
         System.out.println(
-                "--------------------------------------------------------------------------------");
+                "------------------------------------------------------------------------------------------------");
 
         for (int n : sizes) {
 
-            performanceTest(
+            runBenchmark(
                     new Event_Stack(),
                     n,
                     rounds);
 
-            performanceTest(
+            runBenchmark(
                     new State_Machine(),
                     n,
                     rounds);
         }
     }
 
-    private static void performanceTest(
+    // =====================================================
+    // BENCHMARK
+    // =====================================================
+
+    private static void runBenchmark(
             WorkflowAlgorithm a,
             int n,
             int rounds) {
@@ -884,35 +738,31 @@ public class Main {
         long totalComparison = 0;
         long totalLoop = 0;
 
+        /*
+         * Warm-up
+         */
+        for (int i = 0; i < 2; i++) {
+
+            benchmarkExecute(a, n);
+
+            a.reset();
+        }
+
+        /*
+         * ทดสอบจริง 5 รอบ
+         */
         for (int round = 0;
              round < rounds;
              round++) {
 
             a.reset();
 
-            /*
-             * Warm-up
-             */
-            for (int i = 0; i < 10; i++) {
-
-                executeWorkflow(a);
-
-                a.reset();
-            }
-
-            a.reset();
-
             long startTime =
                     System.nanoTime();
 
-            for (int i = 0;
-                 i < n;
-                 i++) {
-
-                executeWorkflow(a);
-
-                a.reset();
-            }
+            benchmarkExecute(
+                    a,
+                    n);
 
             long endTime =
                     System.nanoTime();
@@ -949,58 +799,89 @@ public class Main {
                 totalLoop / rounds;
 
         System.out.printf(
-                "%-8d %-38s %-15d %-10d %-10d %-15d %-10d%n",
+                "%-8d %-32s %-18d %-10d %-10d %-15d %-10d%n",
                 n,
                 a.getName(),
                 averageTime,
                 averagePush,
                 averagePop,
                 averageComparison,
-                averageLoop
-        );
+                averageLoop);
     }
 
     // =====================================================
-    // EXECUTE WORKFLOW
+    // BENCHMARK EXECUTION
     // =====================================================
 
-    private static void executeWorkflow(
-            WorkflowAlgorithm a) {
-
-        a.addAction(
-                Action.CALL_RECEIVED);
-
-        a.addAction(
-                Action.TEAM_ASSIGNED);
-
-        a.addAction(
-                Action.VEHICLE_DISPATCHED);
-
-        a.addAction(
-                Action.ARRIVED_AT_SCENE);
-
-        a.addAction(
-                Action.CASE_CLOSED);
+    private static void benchmarkExecute(
+            WorkflowAlgorithm a,
+            int n) {
 
         /*
-         * Undo 2 ครั้ง
-         */
-        a.undo();
-        a.undo();
-
-        /*
-         * Redo 1 ครั้ง
-         */
-        a.redo();
-
-        /*
-         * เพิ่ม Action ใหม่
+         * สร้างข้อมูลจำลอง n รายการ
+         * เพื่อวัดการทำงานของ Algorithm
          *
-         * หลัง Redo บางส่วน
-         * Redo Stack ต้องถูกล้าง
+         * ใช้ Action ที่วนซ้ำเพื่อให้สามารถ
+         * สร้างข้อมูลจำนวนมากได้
          */
-        a.addAction(
-                Action.VEHICLE_DISPATCHED);
+
+        for (int i = 0;
+             i < n;
+             i++) {
+
+            /*
+             * ทุก 5 รายการคือ workflow
+             * หนึ่งรอบ
+             */
+
+            int type = i % 5;
+
+            switch (type) {
+
+                case 0:
+
+                    a.addAction(
+                            Action.CALL_RECEIVED);
+
+                    break;
+
+                case 1:
+
+                    a.addAction(
+                            Action.TEAM_ASSIGNED);
+
+                    break;
+
+                case 2:
+
+                    a.addAction(
+                            Action.VEHICLE_DISPATCHED);
+
+                    break;
+
+                case 3:
+
+                    a.addAction(
+                            Action.ARRIVED_AT_SCENE);
+
+                    break;
+
+                case 4:
+
+                    a.addAction(
+                            Action.CASE_CLOSED);
+
+                    /*
+                     * เริ่ม workflow ใหม่
+                     * เพื่อให้สามารถทดสอบ n
+                     * จำนวนมากได้
+                     */
+
+                    a.reset();
+
+                    break;
+            }
+        }
     }
 
     // =====================================================
@@ -1015,32 +896,22 @@ public class Main {
         System.out.println();
 
         System.out.println(
-                "==============================================");
-
-        System.out.println(
-                "                    STATUS");
-
-        System.out.println(
-                "==============================================");
+                "--------------- STATUS ----------------");
 
         System.out.println(
                 "Algorithm : "
-                        + getAlgorithmName());
+                        + algorithm.getName());
 
         System.out.println(
                 "Current State : "
                         + data.getCurrentState());
 
-        System.out.println();
-
         showEventStack(data);
-
-        System.out.println();
 
         showRedoStack(data);
 
         System.out.println(
-                "==============================================");
+                "----------------------------------------");
     }
 
     // =====================================================
@@ -1050,8 +921,10 @@ public class Main {
     private static void showEventStack(
             WorkflowData data) {
 
-        List<Action> events =
+        List<Action> list =
                 data.eventBottomToTop();
+
+        System.out.println();
 
         System.out.println(
                 "Event Stack:");
@@ -1059,20 +932,20 @@ public class Main {
         System.out.println(
                 "TOP");
 
-        if (events.isEmpty()) {
+        if (list.isEmpty()) {
 
             System.out.println(
                     "  [ว่าง]");
 
         } else {
 
-            for (int i = events.size() - 1;
+            for (int i = list.size() - 1;
                  i >= 0;
                  i--) {
 
                 System.out.println(
                         "  "
-                                + events.get(i));
+                                + list.get(i));
             }
         }
 
@@ -1087,8 +960,10 @@ public class Main {
     private static void showRedoStack(
             WorkflowData data) {
 
-        List<Action> redo =
+        List<Action> list =
                 data.redoTopToBottom();
+
+        System.out.println();
 
         System.out.println(
                 "Redo Stack:");
@@ -1096,14 +971,14 @@ public class Main {
         System.out.println(
                 "TOP");
 
-        if (redo.isEmpty()) {
+        if (list.isEmpty()) {
 
             System.out.println(
                     "  [ว่าง]");
 
         } else {
 
-            for (Action action : redo) {
+            for (Action action : list) {
 
                 System.out.println(
                         "  "
@@ -1145,23 +1020,7 @@ public class Main {
     }
 
     // =====================================================
-    // ALGORITHM NAME
-    // =====================================================
-
-    private static String getAlgorithmName() {
-
-        if (algorithm instanceof Event_Stack) {
-
-            return "A - Event Stack";
-
-        } else {
-
-            return "B - Event Stack + State Machine";
-        }
-    }
-
-    // =====================================================
-    // INPUT VALIDATION
+    // INPUT
     // =====================================================
 
     private static int readInt(

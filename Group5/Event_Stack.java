@@ -1,343 +1,209 @@
 package Group5;
 
-import java.util.Iterator;
+public class Event_Stack extends WorkflowAlgorithm {
 
-/*
- * Algorithm A: Event Stack
- *
- * ตรวจสอบ Action ใหม่จากข้อมูลใน Event Stack
- */
-public class Event_Stack
-        implements WorkflowAlgorithm {
+    @Override
+    public String getName() {
 
-    private final WorkflowData data =
-            new WorkflowData();
-
-    private long pushCount;
-    private long popCount;
-    private long comparisonCount;
-    private long loopCount;
-
-    /*
-     * Transition Table
-     */
-    private State transition(
-            State state,
-            Action action) {
-
-        comparisonCount++;
-
-        if (state == State.NEW &&
-                action == Action.CALL_RECEIVED) {
-
-            return State.RECEIVED;
-        }
-
-        comparisonCount++;
-
-        if (state == State.RECEIVED &&
-                action == Action.TEAM_ASSIGNED) {
-
-            return State.ASSIGNED;
-        }
-
-        comparisonCount++;
-
-        if (state == State.ASSIGNED &&
-                action == Action.VEHICLE_DISPATCHED) {
-
-            return State.DISPATCHED;
-        }
-
-        comparisonCount++;
-
-        if (state == State.DISPATCHED &&
-                action == Action.ARRIVED_AT_SCENE) {
-
-            return State.ON_SCENE;
-        }
-
-        comparisonCount++;
-
-        if (state == State.ON_SCENE &&
-                action == Action.CASE_CLOSED) {
-
-            return State.CLOSED;
-        }
-
-        return null;
+        return "Algorithm A - Event Stack";
     }
 
-    /*
-     * สร้าง State ปัจจุบันจาก Event Stack
-     *
-     * เริ่มจาก NEW
-     * แล้วอ่าน Event จาก Bottom -> Top
-     */
-    private State replayEventStack() {
+    // =====================================================
+    // ADD ACTION
+    // =====================================================
 
-        State state = State.NEW;
+    @Override
+    public boolean addAction(Action newAction) {
 
-        Iterator<Action> iterator =
-                data.getEventStack()
-                        .descendingIterator();
+        if (newAction == null) {
+            return false;
+        }
 
-        while (iterator.hasNext()) {
+        /*
+         * Algorithm A
+         * ต้อง Replay Event Stack
+         * เพื่อหาสถานะปัจจุบัน
+         */
+
+        State calculatedState =
+                State.NEW;
+
+        for (Action action :
+                data.eventBottomToTop()) {
 
             loopCount++;
 
-            Action action =
-                    iterator.next();
-
-            State nextState =
+            State next =
                     transition(
-                            state,
+                            calculatedState,
                             action);
 
-            if (nextState == null) {
-                return null;
+            if (next == null) {
+                return false;
             }
 
-            state = nextState;
-        }
-
-        return state;
-    }
-
-    /*
-     * ตรวจสอบ Invariant
-     *
-     * State ที่ได้จาก Event Stack
-     * ต้องตรงกับ currentState
-     */
-    private boolean validateInvariant() {
-
-        State replayedState =
-                replayEventStack();
-
-        return replayedState != null
-                && replayedState
-                == data.getCurrentState();
-    }
-
-    /*
-     * เพิ่ม Action ใหม่
-     */
-    @Override
-    public boolean addAction(Action action) {
-
-        if (action == null) {
-            return false;
+            calculatedState = next;
         }
 
         /*
-         * Algorithm A:
-         * หา State จาก Event Stack
+         * ตรวจสอบ Action ใหม่
          */
-        State currentState =
-                replayEventStack();
 
-        if (currentState == null) {
-            return false;
-        }
-
-        /*
-         * ตรวจ Transition
-         */
         State nextState =
                 transition(
-                        currentState,
-                        action);
+                        calculatedState,
+                        newAction);
 
-        /*
-         * Transition ผิดลำดับ
-         */
         if (nextState == null) {
             return false;
         }
 
         /*
-         * เพิ่ม Action เข้า Event Stack
+         * เพิ่ม Action
          */
-        data.getEventStack().push(action);
+
+        data.pushEvent(newAction);
 
         pushCount++;
 
         /*
-         * กฎข้อ 3
-         *
-         * เพิ่ม Action ใหม่หลัง Redo
+         * เพิ่ม Action ใหม่
          * ต้องล้าง Redo Stack
          */
-        data.getRedoStack().clear();
+
+        data.clearRedo();
 
         /*
          * Update State
          */
+
         data.setCurrentState(nextState);
 
-        /*
-         * กฎข้อ 4
-         */
-        return validateInvariant();
+        return true;
     }
 
-    /*
-     * Undo
-     */
+    // =====================================================
+    // UNDO
+    // =====================================================
+
     @Override
     public boolean undo() {
 
-        /*
-         * กฎ:
-         * Event Stack ว่าง -> Undo ไม่ได้
-         */
         if (data.getEventStack().isEmpty()) {
             return false;
         }
 
-        /*
-         * เอา Action ล่าสุดออก
-         */
         Action removed =
-                data.getEventStack().pop();
+                data.popEvent();
 
         popCount++;
 
-        /*
-         * ย้ายไป Redo Stack
-         */
-        data.getRedoStack().push(removed);
+        data.pushRedo(removed);
 
         pushCount++;
 
-        /*
-         * สร้าง State ใหม่จาก Event Stack
-         */
-        State state =
-                replayEventStack();
+        movedDataCount++;
 
-        if (state == null) {
-            return false;
+        /*
+         * Algorithm A ต้อง Replay Stack
+         * เพื่อหา State ใหม่
+         */
+
+        State calculatedState =
+                State.NEW;
+
+        for (Action action :
+                data.eventBottomToTop()) {
+
+            loopCount++;
+
+            State next =
+                    transition(
+                            calculatedState,
+                            action);
+
+            if (next == null) {
+                return false;
+            }
+
+            calculatedState = next;
         }
 
-        data.setCurrentState(state);
+        data.setCurrentState(
+                calculatedState);
 
-        /*
-         * กฎข้อ 4
-         */
-        return validateInvariant();
+        return true;
     }
 
-    /*
-     * Redo
-     */
+    // =====================================================
+    // REDO
+    // =====================================================
+
     @Override
     public boolean redo() {
 
-        /*
-         * ไม่มี Redo
-         */
         if (data.getRedoStack().isEmpty()) {
             return false;
         }
 
-        /*
-         * Action ล่าสุดของ Redo Stack
-         */
         Action action =
-                data.getRedoStack().peek();
+                data.popRedo();
+
+        popCount++;
 
         /*
          * หา State จาก Event Stack
          */
-        State currentState =
-                replayEventStack();
 
-        if (currentState == null) {
-            return false;
+        State calculatedState =
+                State.NEW;
+
+        for (Action oldAction :
+                data.eventBottomToTop()) {
+
+            loopCount++;
+
+            State next =
+                    transition(
+                            calculatedState,
+                            oldAction);
+
+            if (next == null) {
+                return false;
+            }
+
+            calculatedState = next;
         }
 
         /*
-         * ตรวจว่า Redo ได้หรือไม่
+         * ตรวจสอบ Action ที่จะ Redo
          */
+
         State nextState =
                 transition(
-                        currentState,
+                        calculatedState,
                         action);
 
         if (nextState == null) {
+
+            /*
+             * ถ้าไม่ถูกต้อง ให้คืน Action
+             */
+            data.pushRedo(action);
+            pushCount++;
+
             return false;
         }
 
-        /*
-         * Redo 1 ครั้ง
-         * เอา Action ล่าสุดกลับ Event Stack
-         */
-        data.getRedoStack().pop();
-
-        popCount++;
-
-        data.getEventStack().push(action);
+        data.pushEvent(action);
 
         pushCount++;
 
-        data.setCurrentState(nextState);
+        movedDataCount++;
 
-        /*
-         * กฎข้อ 4
-         */
-        return validateInvariant();
-    }
+        data.setCurrentState(
+                nextState);
 
-    @Override
-    public boolean isInvariantValid() {
-        return validateInvariant();
-    }
-
-    @Override
-    public State getCurrentState() {
-        return data.getCurrentState();
-    }
-
-    @Override
-    public WorkflowData getData() {
-        return data;
-    }
-
-    @Override
-    public long getPushCount() {
-        return pushCount;
-    }
-
-    @Override
-    public long getPopCount() {
-        return popCount;
-    }
-
-    @Override
-    public long getComparisonCount() {
-        return comparisonCount;
-    }
-
-    @Override
-    public long getLoopCount() {
-        return loopCount;
-    }
-
-    @Override
-    public String getName() {
-        return "Algorithm A: Event Stack";
-    }
-
-    @Override
-    public void reset() {
-
-        data.reset();
-
-        pushCount = 0;
-        popCount = 0;
-        comparisonCount = 0;
-        loopCount = 0;
+        return true;
     }
 }
