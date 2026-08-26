@@ -1,5 +1,3 @@
-package Group5;
-
 public enum Action {
     CALL_RECEIVED,
     TEAM_ASSIGNED,

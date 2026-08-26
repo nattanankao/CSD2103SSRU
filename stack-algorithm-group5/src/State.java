@@ -1,5 +1,3 @@
-package Group5;
-
 public enum State {
     NEW,
     RECEIVED,
